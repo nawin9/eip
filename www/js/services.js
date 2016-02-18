@@ -1,24 +1,109 @@
 angular.module('starter.services', [])
 
-.service('AuthService', function($q, $http) {
-  var login = function(email, pw) {
-    return $q(function(resolve, reject) {
-      $http.post('192.168.0.18:8080/api/v1/auth/login', {"email" : email, "pass" : pw}).then(function(resp) {
-        alert(email)
-        if (resp.data.message) {
-          reject('Failed login')
-        } else {
-          resolve('Login Success')
-        }
-      })
+// .service('AuthService', function($q, $http) {
+//   var login = function(email, pw) {
+//     return $q(function(resolve, reject) {
+//       $http.post('192.168.0.18:8080/api/v1/auth/login', {"email" : email, "pass" : pw}).then(function(resp) {
+//         alert(email)
+//         if (resp.data.message) {
+//           reject('Failed login')
+//         } else {
+//           resolve('Login Success')
+//         }
+//       })
 
-    })
-  }
+//     })
+//   }
+
+//   return {
+//     login : login
+//   }
+// })
+.factory('AuthService', function($http, $q, API_SERVER) {
+
+  var authenticate = function(username, email, password, endpoint) {
+    var url = API_SERVER + endpoint;
+    var deferred = $q.defer();
+    var param = 'username=' + username + '&password=' + password;
+    if (email!=null) {
+      param += '&email=' + email; 
+    }
+    console.log(param)
+    $http.post(url, param, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }).then(
+      function(response) {
+        var token = response.data.token;
+        var username = response.data.username;
+
+        if (token && username) {
+          window.localStorage.token = token;
+          window.localStorage.username = username;
+          deferred.resolve(true);
+        } else {
+          deferred.reject('Invalid data received from server');
+        }
+      },
+      function(response) {
+        deferred.reject(response.data.error);
+      }
+    );
+    return deferred.promise;
+  };
+
+  var logout = function() {
+    var deferred = $q.defer();
+    var url = API_SERVER + 'logout/';
+
+    $http.post(url).then(
+      function() {
+        window.localStorage.removeItem('token');
+        window.localStorage.removeItem('username');
+        deferred.resolve();
+      },
+      function(error) {
+        deferred.reject(error.data.error);
+      }
+    );
+    return deferred.promise;
+  };
 
   return {
-    login : login
-  }
+    register: function(username, email, password) {
+      return authenticate(username, email, password, 'register/');
+    },
+    login: function(username, password) {
+      return authenticate(username, null, password, 'login/');
+    },
+    logout: function() {
+      return logout();
+    }
+  };
 
+})
+
+.factory('AuthInterceptor', function($rootScope, $q, $location) {
+  return {
+    request: function(config) {
+      config.headers = config.headers || {};
+      if (window.localStorage.token) {
+        config.headers.Authorization = 'Token ' + window.localStorage.token;
+      }
+      return config;
+    },
+
+    responseError: function(response) {
+      if (response.status === 401) {
+        window.localStorage.removeItem('token');
+        window.localStorage.removeItem('username');
+        $location.path('/');
+        return;
+      }
+      return $q.reject(response);
+    }
+  };
 })
 
 .factory('AuthManager', function($http, PromiseFactory) {

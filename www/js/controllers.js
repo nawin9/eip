@@ -27,32 +27,51 @@ angular.module('starter.controllers', [])
   };
 })
 
-.controller('LoginCtrl', function($scope, $ionicPopup, $state, AuthManager) {
+.controller('RegisterCtrl', function($scope, $ionicPopup, $state, AuthService) {
+  var ctrl = this
+ 
+  ctrl.register = function(data) {
+      AuthService.register(data.username, data.email, data.password).then(
+        function() {
+          $state.go('login');
+        },
+        function(error) {
+          var alertPopup = $ionicPopup.alert({
+              title: 'Register failed!',
+              template: 'User already exists!'
+          });
+        }
+      )}
+})
+
+.controller('LoginCtrl', function($scope, $ionicPopup, $state, AuthService) {
 
     var ctrl = this
  
     ctrl.login = function(data) {
-        // AuthService.login(data.email, data.password).success(function(d) {
-        //     $state.go('tab.dash');
-        // }).error(function(d) {
-        //     var alertPopup = $ionicPopup.alert({
-        //         title: 'Login failed!',
-        //         template: 'Please check your credentials!'
-        //     });
-        // });
-
-      AuthManager
-        .login(data.email, data.password)
-        .success(function(res) {
-          //sessionStorage.setItem('authToken', res.authToken);
-          $state.go('tab.dash')
-        })
-        .error(function(err) {
-          var alertPopup = $ionicPopup.alert({
-            title: 'Login failed!',
-            template: 'Please check your credentials!'
-          });
-        })
-  }
+        AuthService.login(data.username, data.password).then(
+          function() {
+            $state.go('tab.dash');
+          }, 
+          function(error) {
+            var alertPopup = $ionicPopup.alert({
+              title: 'Login failed!',
+              template: 'Please check your credentials!'
+            });
+          }
+      )}
+      // AuthManager
+      //   .login(data.email, data.password)
+      //   .success(function(res) {
+      //     //sessionStorage.setItem('authToken', res.authToken);
+      //     $state.go('tab.dash')
+      //   })
+      //   .error(function(err) {
+      //     var alertPopup = $ionicPopup.alert({
+      //       title: 'Login failed!',
+      //       template: 'Please check your credentials!'
+      //     });
+      //   })
+  
 
 })

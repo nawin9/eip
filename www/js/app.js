@@ -21,15 +21,24 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       StatusBar.styleDefault();
     }
   });
-  $http.defaults.headers.common['X-CSRFToken'] = $cookies['csrftoken'];
+  //$http.defaults.headers.common['X-CSRFToken'] = $cookies['csrftoken'];
+  //$http.defaults.xsrfHeaderName = 'X-CSRFToken'
+  //$http.defaults.xsrfCookieName = 'csrftoken'
 })
 
 .config(function($httpProvider) {
-  $httpProvider.defaults.xsrfCookieName = 'csrftoken'
-  $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken'
-  $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
+  $httpProvider.interceptors.push('AuthInterceptor')
 })
+
+.constant('API_SERVER', 'http://10.18.207.194:8080/api/')
+
+// .config(function($httpProvider) {
+//   //$httpProvider.defaults.xsrfCookieName = 'csrftoken'
+//   //$httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken'
+//   //$httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+//   $httpProvider.defaults.useXDomain = true;
+//   delete $httpProvider.defaults.headers.common['X-Requested-With'];
+// })
 
 .config(function($stateProvider, $urlRouterProvider) {
 
@@ -40,7 +49,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
   $stateProvider
 
   // setup an abstract state for the tabs directive
-    .state('tab', {
+  .state('tab', {
     url: '/tab',
     abstract: true,
     templateUrl: 'templates/tabs.html'
@@ -50,6 +59,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
   .state('login', {
     url: '/login',
     templateUrl: 'templates/login.html'
+  })
+
+  .state('register', {
+    url: '/register',
+    templateUrl: 'templates/register.html'
   })
 
   .state('tab.dash', {

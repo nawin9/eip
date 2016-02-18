@@ -1,4 +1,4 @@
-<ion-view view-title="Login" ng-controller="LoginCtrl as ctrl">
+<ion-view view-title="Register" ng-controller="RegisterCtrl as ctrl">
   <ion-content class="padding">
 
       <div class="list list-inset">
@@ -6,9 +6,12 @@
               <input type="text" placeholder="Username" ng-model="data.username">
           </label>
           <label class="item item-input">
+              <input type="email" placeholder="Email" ng-model="data.email">
+          </label>
+          <label class="item item-input">
               <input type="password" placeholder="Password" ng-model="data.password">
           </label>
       </div>
-      <button class="button button-block button-calm" ng-click="ctrl.login(data)">Login</button>
+      <button class="button button-block button-calm" ng-click="ctrl.register(data)">Register</button>
   </ion-content>
 </ion-view>
